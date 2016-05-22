@@ -1,7 +1,8 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Random;
 
-class Chromosome {
+class Chromosome implements Comparable<Chromosome> {
 
     /**
      * The list of cities, which are the genes of this chromosome.
@@ -87,25 +88,8 @@ class Chromosome {
         cityList[index] = value;
     }
 
-    /**
-     * Sort the chromosomes by their cost.
-     *
-     * @param chromosomes An array of chromosomes to sort.
-     * @param num         How much of the chromosome list to sort.
-     */
-    public static void sortChromosomes(Chromosome chromosomes[], int num) {
-        Chromosome ctemp;
-        boolean swapped = true;
-        while (swapped) {
-            swapped = false;
-            for (int i = 0; i < num - 1; i++) {
-                if (chromosomes[i].getCost() > chromosomes[i + 1].getCost()) {
-                    ctemp = chromosomes[i];
-                    chromosomes[i] = chromosomes[i + 1];
-                    chromosomes[i + 1] = ctemp;
-                    swapped = true;
-                }
-            }
-        }
+    @Override
+    public int compareTo(Chromosome that) {
+        return Double.compare(this.getCost(), that.getCost());
     }
 }

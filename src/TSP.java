@@ -4,19 +4,15 @@ import java.awt.event.*;
 import java.io.*;
 import java.sql.Time;
 import java.text.*;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Random;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.awt.*; 
+import java.util.*;
+import java.awt.*;
 
 import javax.swing.*;
 
 public class TSP {
 
 	private static final int cityShiftAmount = 60; //DO NOT CHANGE THIS.
-	
+
     /**
      * How many cities to use.
      */
@@ -46,7 +42,7 @@ public class TSP {
      * The list of cities (with current movement applied).
      */
     protected static City[] cities;
-    
+
     /**
      * The list of cities that will be used to determine movement.
      */
@@ -131,7 +127,7 @@ public class TSP {
                 int ypos = cities[i].gety();
                 g.setColor(Color.green);
                 g.fillOval(xpos - 5, ypos - 5, 10, 10);
-                
+
                 //// SHOW Outline of movement boundary
                 // xpos = originalCities[i].getx();
                 // ypos = originalCities[i].gety();
@@ -154,10 +150,10 @@ public class TSP {
                         cities[last].gety());
                 }
             }
-                        
+
             int homeCity = chromosomes[0].getCity(0);
             int lastCity = chromosomes[0].getCity(cityCount - 1);
-                        
+
             //Drawing line returning home
             g.drawLine(
                     cities[homeCity].getx(),
@@ -170,12 +166,12 @@ public class TSP {
 
     private static City[] LoadCitiesFromFile(String filename, City[] citiesArray) {
         ArrayList<City> cities = new ArrayList<City>();
-        try 
+        try
         {
             FileReader inputFile = new FileReader(filename);
             BufferedReader bufferReader = new BufferedReader(inputFile);
             String line;
-            while ((line = bufferReader.readLine()) != null) { 
+            while ((line = bufferReader.readLine()) != null) {
                 String [] coordinates = line.split(", ");
                 cities.add(new City(Integer.parseInt(coordinates[0]), Integer.parseInt(coordinates[1])));
             }
@@ -183,9 +179,9 @@ public class TSP {
             bufferReader.close();
 
         } catch (Exception e) {
-            System.out.println("Error while reading file line by line:" + e.getMessage());                      
+            System.out.println("Error while reading file line by line:" + e.getMessage());
         }
-        
+
         citiesArray = new City[cities.size()];
         return cities.toArray(citiesArray);
     }
@@ -197,9 +193,9 @@ public class TSP {
         for(int i = 0; i < cities.length; i++) {
         	int x = cities[i].getx();
         	int y = cities[i].gety();
-        	
+
             int position = randomGenerator.nextInt(5);
-            
+
             if(position == 1) {
             	y += cityShiftAmount;
             } else if(position == 2) {
@@ -209,10 +205,10 @@ public class TSP {
             } else if(position == 4) {
             	x -= cityShiftAmount;
             }
-            
+
             newPositions[i] = new City(x, y);
         }
-        
+
         return newPositions;
     }
 
@@ -232,7 +228,7 @@ public class TSP {
         } else {
 
             if (args.length > 1) {
-                display = true; 
+                display = true;
             }
 
             try {
@@ -249,13 +245,13 @@ public class TSP {
                     frame.setSize(width + 300, height);
                     frame.setResizable(false);
                     frame.setLayout(new BorderLayout());
-                    
+
                     statsText = new TextArea(35, 35);
                     statsText.setEditable(false);
 
                     statsArea.add(statsText);
                     frame.add(statsArea, BorderLayout.EAST);
-                    
+
                     frame.setVisible(true);
                 }
 
@@ -283,18 +279,18 @@ public class TSP {
 
                     while (generation < 100) {
                         evolve();
-                        if(generation % 5 == 0 ) 
+                        if(generation % 5 == 0 )
                             cities = MoveCities(originalCities); //Move from original cities, so they only move by a maximum of one unit.
                         generation++;
 
-                        Chromosome.sortChromosomes(chromosomes, populationSize);
+                        Arrays.sort(chromosomes);
                         double cost = chromosomes[0].getCost();
                         thisCost = cost;
 
                         if (thisCost < genMin || genMin == 0) {
                             genMin = thisCost;
                         }
-                        
+
                         NumberFormat nf = NumberFormat.getInstance();
                         nf.setMinimumFractionDigits(2);
                         nf.setMinimumFractionDigits(2);

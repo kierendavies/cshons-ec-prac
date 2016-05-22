@@ -22,7 +22,7 @@ public class City {
     }
 
     /**
-     * Return's the city's x position.
+     * Returns the city's x position.
      *
      * @return The city's x position.
      */
