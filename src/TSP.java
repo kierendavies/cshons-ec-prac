@@ -6,6 +6,7 @@ import java.sql.Time;
 import java.text.*;
 import java.util.*;
 import java.awt.*;
+import java.util.List;
 
 import javax.swing.*;
 
@@ -107,7 +108,27 @@ public class TSP {
     }
 
     public static void evolve() {
-        //Write evolution code here.
+        List<Chromosome> nextGen = new ArrayList<>(Arrays.asList(chromosomes));
+
+        for (Chromosome c1 : chromosomes) {
+            Chromosome child = c1.swapPair();
+            child.calculateCost(cities);
+            nextGen.add(child);
+
+            for (Chromosome c2 : chromosomes) {
+                if (c2 == c1) continue;
+                child = c1.pmx(c2);
+                child.calculateCost(cities);
+                nextGen.add(child);
+                child = c2.pmx(c1);
+                child.calculateCost(cities);
+                nextGen.add(child);
+            }
+        }
+
+        // elite selection
+        nextGen.sort(Chromosome::compareTo);
+        nextGen.subList(0, populationSize).toArray(chromosomes);
     }
 
     /**

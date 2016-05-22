@@ -1,13 +1,13 @@
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Random;
+import java.util.*;
 
 class Chromosome implements Comparable<Chromosome> {
+    private Random random = new Random();
 
     /**
      * The list of cities, which are the genes of this chromosome.
      */
     protected int[] cityList;
+    protected int length;
 
     /**
      * The cost of following the cityList order of this chromosome.
@@ -18,22 +18,28 @@ class Chromosome implements Comparable<Chromosome> {
      * @param cities The order that this chromosome would visit the cities.
      */
     Chromosome(City[] cities) {
-        Random generator = new Random();
-        cityList = new int[cities.length];
+        length = cities.length;
+        cityList = new int[length];
         //cities are visited based on the order of an integer representation [o,n] of each of the n cities.
         for (int x = 0; x < cities.length; x++) {
             cityList[x] = x;
         }
 
         //shuffle the order so we have a random initial order
-        for (int y = 0; y < cityList.length; y++) {
+        for (int y = 0; y < length; y++) {
             int temp = cityList[y];
-            int randomNum = generator.nextInt(cityList.length);
+            int randomNum = random.nextInt(length);
             cityList[y] = cityList[randomNum];
             cityList[randomNum] = temp;
         }
 
         calculateCost(cities);
+    }
+
+    Chromosome(Chromosome original) {
+        cityList = Arrays.copyOf(original.cityList, original.length);
+        length = original.length;
+        cost = original.cost;
     }
 
     /**
@@ -43,12 +49,12 @@ class Chromosome implements Comparable<Chromosome> {
      */
     void calculateCost(City[] cities) {
         cost = 0;
-        for (int i = 0; i < cityList.length - 1; i++) {
+        for (int i = 0; i < length - 1; i++) {
             double dist = cities[cityList[i]].proximity(cities[cityList[i + 1]]);
             cost += dist;
         }
 
-        cost += cities[cityList[0]].proximity(cities[cityList[cityList.length - 1]]); //Adding return home
+        cost += cities[cityList[0]].proximity(cities[cityList[length - 1]]); //Adding return home
     }
 
     /**
@@ -73,7 +79,7 @@ class Chromosome implements Comparable<Chromosome> {
      * @param list A list of cities.
      */
     void setCities(int[] list) {
-        for (int i = 0; i < cityList.length; i++) {
+        for (int i = 0; i < length; i++) {
             cityList[i] = list[i];
         }
     }
@@ -91,5 +97,62 @@ class Chromosome implements Comparable<Chromosome> {
     @Override
     public int compareTo(Chromosome that) {
         return Double.compare(this.getCost(), that.getCost());
+    }
+
+    @Override
+    public String toString() {
+        StringJoiner sj = new StringJoiner(", ");
+        for (int i : cityList) {
+            sj.add(Integer.toString(i));
+        }
+        return sj.toString();
+    }
+
+    public void randomise() {
+        for (int y = 0; y < length; y++) {
+            int temp = cityList[y];
+            int randomNum = random.nextInt(length);
+            cityList[y] = cityList[randomNum];
+            cityList[randomNum] = temp;
+        }
+    }
+
+    public Chromosome swapPair() {
+        Chromosome child = new Chromosome(this);
+        Pair<Integer, Integer> pair = Util.randomDistinctPair(length);
+        int i = pair.first;
+        int j = pair.second;
+        child.cityList[i] = cityList[j];
+        child.cityList[j] = cityList[i];
+        return child;
+    }
+
+    public Chromosome pmx(Chromosome that) {
+        Chromosome child = new Chromosome(that);
+
+        Pair<Integer, Integer> pair = Util.randomDistinctPair(length + 1);
+        int p1 = pair.first;
+        int p2 = pair.second;
+
+        BitSet used = new BitSet(length);
+        for (int i = p1; i < p2; i++) {
+            child.cityList[i] = this.cityList[i];
+            used.set(this.cityList[i]);
+        }
+
+        for (int i = p1; i < p2; i++) {
+            if (!used.get(that.cityList[i])) {
+                int mapThat = that.cityList[i];
+                int mapThis;
+                int index = i;
+                do {
+                    mapThis = this.cityList[index];
+                    index = Util.linearSearch(that.cityList, mapThis);
+                } while (p1 <= index && index < p2);
+                child.cityList[index] = mapThat;
+            }
+        }
+
+        return child;
     }
 }
