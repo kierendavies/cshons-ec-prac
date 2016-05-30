@@ -296,11 +296,11 @@ public class TSP {
                             genMin = thisCost;
                         }
 
-//                        NumberFormat nf = NumberFormat.getInstance();
-//                        nf.setMinimumFractionDigits(2);
-//                        nf.setMinimumFractionDigits(2);
-//
-//                        print(display, "Gen: " + generation + " Cost: " + (int) thisCost);
+                        NumberFormat nf = NumberFormat.getInstance();
+                        nf.setMinimumFractionDigits(2);
+                        nf.setMinimumFractionDigits(2);
+
+                        print(display, "Gen: " + generation + " Cost: " + (int) thisCost);
 
                         if(display) {
                             updateGUI();
