@@ -124,6 +124,8 @@ class Chromosome implements Comparable<Chromosome> {
         int j = pair.second;
         child.cityList[i] = cityList[j];
         child.cityList[j] = cityList[i];
+
+        child.validate();
         return child;
     }
 
@@ -153,6 +155,46 @@ class Chromosome implements Comparable<Chromosome> {
             }
         }
 
+        child.validate();
         return child;
+    }
+
+    public Chromosome ox1(Chromosome that) {
+        Chromosome child = new Chromosome(this);
+
+        Pair<Integer, Integer> pair = Util.randomDistinctPair(length + 1);
+        int p1 = pair.first;
+        int p2 = pair.second;
+
+        BitSet used = new BitSet(length);
+        for (int i = p1; i < p2; i++) {
+            child.cityList[i] = this.cityList[i];
+            used.set(this.cityList[i]);
+        }
+
+        Queue<Integer> unused = new LinkedList<>();
+        for (int i = 0; i < length; i++) {
+            if (!used.get(that.cityList[i])) {
+                unused.add(that.cityList[i]);
+            }
+        }
+
+        for (int i = 0; i < p1; i++) {
+            child.cityList[i] = unused.remove();
+        }
+        for (int i = p2; i < length; i++) {
+            child.cityList[i] = unused.remove();
+        }
+
+        child.validate();
+        return child;
+    }
+
+    private void validate() throws AssertionError {
+        BitSet used = new BitSet(length);
+        for (int i : cityList) {
+            used.set(i);
+        }
+        assert used.nextClearBit(0) == length;
     }
 }

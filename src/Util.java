@@ -16,6 +16,13 @@ public class Util {
         return new Pair<>(x, y);
     }
 
+    public static int randomWeighted(double[] cumulativeWeights) {
+        double r = random.nextDouble() * cumulativeWeights[cumulativeWeights.length - 1];
+        int i = 0;
+        while (cumulativeWeights[i] < r) i++;
+        return i;
+    }
+
     public static int linearSearch(int[] array, int element) {
         int index = -1;
         for (int i = 0; i < array.length; i++) {
