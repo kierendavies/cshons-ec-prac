@@ -1,12 +1,7 @@
-import java.applet.Applet;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.*;
-import java.sql.Time;
 import java.text.*;
 import java.util.*;
-import java.awt.*;
-import java.util.List;
 
 import javax.swing.*;
 
@@ -108,27 +103,17 @@ public class TSP {
     }
 
     public static void evolve() {
-        List<Chromosome> nextGen = new ArrayList<>(Arrays.asList(chromosomes));
+        Arrays.sort(chromosomes);  // not always sorted already
+        Chromosome[] newChromosomes = new Chromosome[populationSize];
 
-        for (Chromosome c1 : chromosomes) {
-            Chromosome child = c1.swapPair();
-            child.calculateCost(cities);
-            nextGen.add(child);
-
-            for (Chromosome c2 : chromosomes) {
-                if (c2 == c1) continue;
-                child = c1.pmx(c2);
-                child.calculateCost(cities);
-                nextGen.add(child);
-                child = c2.pmx(c1);
-                child.calculateCost(cities);
-                nextGen.add(child);
-            }
+        // Looks like crossover, mutating anything but the best solution, or
+        // any kind of elite selection all produce inferior results
+        for (int i = 0; i < populationSize; i++) {
+            newChromosomes[i] = chromosomes[0].reverseSegment();
+            newChromosomes[i].calculateCost(cities);
         }
 
-        // elite selection
-        nextGen.sort(Chromosome::compareTo);
-        nextGen.subList(0, populationSize).toArray(chromosomes);
+        chromosomes = newChromosomes;
     }
 
     /**
@@ -142,7 +127,7 @@ public class TSP {
         g.setColor(Color.black);
         g.fillRect(0, 0, width, height);
 
-        if (true && (cities != null)) {
+        if (cities != null) {
             for (int i = 0; i < cityCount; i++) {
                 int xpos = cities[i].getx();
                 int ypos = cities[i].gety();
@@ -185,7 +170,7 @@ public class TSP {
         frame.getGraphics().drawImage(img, 0, 0, frame);
     }
 
-    private static City[] LoadCitiesFromFile(String filename, City[] citiesArray) {
+    private static City[] loadCitiesFromFile(String filename, City[] citiesArray) {
         ArrayList<City> cities = new ArrayList<City>();
         try
         {
@@ -207,7 +192,7 @@ public class TSP {
         return cities.toArray(citiesArray);
     }
 
-    private static City[] MoveCities(City[]cities) {
+    private static City[] moveCities(City[]cities) {
     	City[] newPositions = new City[cities.length];
         Random randomGenerator = new Random();
 
@@ -282,7 +267,7 @@ public class TSP {
                 max = 0;
                 sum = 0;
 
-                originalCities = cities = LoadCitiesFromFile("CityList.txt", cities);
+                originalCities = cities = loadCitiesFromFile("CityList.txt", cities);
 
                 writeLog("Run Stats for experiment at: " + currentTime);
                 for (int y = 1; y <= runs; y++) {
@@ -296,27 +281,26 @@ public class TSP {
                     }
 
                     generation = 0;
-                    double thisCost = 0.0;
+                    double thisCost;
 
                     while (generation < 100) {
                         evolve();
                         if(generation % 5 == 0 )
-                            cities = MoveCities(originalCities); //Move from original cities, so they only move by a maximum of one unit.
+                            cities = moveCities(originalCities); //Move from original cities, so they only move by a maximum of one unit.
                         generation++;
 
                         Arrays.sort(chromosomes);
-                        double cost = chromosomes[0].getCost();
-                        thisCost = cost;
+                        thisCost = chromosomes[0].getCost();
 
                         if (thisCost < genMin || genMin == 0) {
                             genMin = thisCost;
                         }
 
-                        NumberFormat nf = NumberFormat.getInstance();
-                        nf.setMinimumFractionDigits(2);
-                        nf.setMinimumFractionDigits(2);
-
-                        print(display, "Gen: " + generation + " Cost: " + (int) thisCost);
+//                        NumberFormat nf = NumberFormat.getInstance();
+//                        nf.setMinimumFractionDigits(2);
+//                        nf.setMinimumFractionDigits(2);
+//
+//                        print(display, "Gen: " + generation + " Cost: " + (int) thisCost);
 
                         if(display) {
                             updateGUI();

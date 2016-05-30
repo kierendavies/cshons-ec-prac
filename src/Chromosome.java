@@ -79,9 +79,7 @@ class Chromosome implements Comparable<Chromosome> {
      * @param list A list of cities.
      */
     void setCities(int[] list) {
-        for (int i = 0; i < length; i++) {
-            cityList[i] = list[i];
-        }
+        System.arraycopy(list, 0, cityList, 0, length);
     }
 
     /**
@@ -120,29 +118,46 @@ class Chromosome implements Comparable<Chromosome> {
     public Chromosome swapPair() {
         Chromosome child = new Chromosome(this);
         Pair<Integer, Integer> pair = Util.randomDistinctPair(length);
-        int i = pair.first;
-        int j = pair.second;
-        child.cityList[i] = cityList[j];
-        child.cityList[j] = cityList[i];
+        int a = pair.first;
+        int b = pair.second;
+
+        child.cityList[a] = cityList[b];
+        child.cityList[b] = cityList[a];
 
         child.validate();
         return child;
     }
 
-    public Chromosome pmx(Chromosome that) {
+    public Chromosome reverseSegment() {
+        Chromosome child = new Chromosome(this);
+        Pair<Integer, Integer> pair = Util.randomDistinctPair(length);
+        int a = pair.first;
+        int b = pair.second;
+
+        int halfDiff = (b - a) / 2;
+        for (int i = 0; i < halfDiff; i++) {
+            child.cityList[a + i] = this.cityList[b - i - 1];
+            child.cityList[b - i - 1] = this.cityList[a + i];
+        }
+
+        child.validate();
+        return child;
+    }
+
+    public Chromosome partiallyMatchedCrossover(Chromosome that) {
         Chromosome child = new Chromosome(that);
 
         Pair<Integer, Integer> pair = Util.randomDistinctPair(length + 1);
-        int p1 = pair.first;
-        int p2 = pair.second;
+        int a = pair.first;
+        int b = pair.second;
 
         BitSet used = new BitSet(length);
-        for (int i = p1; i < p2; i++) {
+        for (int i = a; i < b; i++) {
             child.cityList[i] = this.cityList[i];
             used.set(this.cityList[i]);
         }
 
-        for (int i = p1; i < p2; i++) {
+        for (int i = a; i < b; i++) {
             if (!used.get(that.cityList[i])) {
                 int mapThat = that.cityList[i];
                 int mapThis;
@@ -150,7 +165,7 @@ class Chromosome implements Comparable<Chromosome> {
                 do {
                     mapThis = this.cityList[index];
                     index = Util.linearSearch(that.cityList, mapThis);
-                } while (p1 <= index && index < p2);
+                } while (a <= index && index < b);
                 child.cityList[index] = mapThat;
             }
         }
@@ -159,7 +174,7 @@ class Chromosome implements Comparable<Chromosome> {
         return child;
     }
 
-    public Chromosome ox1(Chromosome that) {
+    public Chromosome orderedCrossover(Chromosome that) {
         Chromosome child = new Chromosome(this);
 
         Pair<Integer, Integer> pair = Util.randomDistinctPair(length + 1);
